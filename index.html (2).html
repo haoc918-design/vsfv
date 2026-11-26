@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thi thử C# cơ bản - 40 câu</title>
+<style>
+:root{--blue:#2457c5;--bg:#f3f5f9;--card:#fff;--text:#172033;--muted:#667085;--border:#dce2eb;--green:#16834a;--red:#c93636}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 Arial,sans-serif}
+.wrap{max-width:900px;margin:28px auto;padding:0 16px}.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin:14px 0;box-shadow:0 2px 8px #16213b0a}
+header{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap}h1{font-size:25px;margin:0}h2{font-size:19px;margin:0 0 12px}.muted{color:var(--muted)}.timer{font-size:27px;font-weight:700;font-variant-numeric:tabular-nums}
+button{font:inherit;cursor:pointer}.primary{background:var(--blue);color:white;border:0;border-radius:9px;padding:11px 17px;font-weight:700}.secondary{background:white;border:1px solid var(--border);border-radius:9px;padding:10px 15px}.primary:disabled,.secondary:disabled{opacity:.45;cursor:not-allowed}
+.hidden{display:none!important}.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:8px}.num{border:1px solid var(--border);background:white;border-radius:7px;padding:7px 0}.num.done{background:var(--blue);color:white}.num.active{outline:2px solid #89a8f5}.bar{height:8px;background:#e8ebf1;border-radius:10px;overflow:hidden}.bar>div{height:100%;background:var(--blue);width:0}
+.option{width:100%;display:flex;text-align:left;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--border);background:white;border-radius:9px;margin:9px 0}.option:hover:not(:disabled){border-color:var(--blue);background:#f7f9ff}.option:disabled{cursor:default;opacity:1}.option.correct{border:2px solid var(--green);background:#effaf3}.option.wrong{border:2px solid var(--red);background:#fff2f2}.letter{font-weight:bold;min-width:24px}.feedback{padding:12px;background:#f1f4f9;border-radius:9px;margin-top:12px}.code{white-space:pre-wrap;background:#f0f2f6;padding:13px;border-radius:9px;overflow:auto;font:14px/1.5 Consolas,monospace}
+.actions{display:flex;justify-content:space-between;gap:10px;margin-top:14px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}.stat{background:#f1f4f9;padding:12px;border-radius:10px}.stat strong{display:block;font-size:24px}
+.review{border:1px solid var(--border);border-radius:10px;padding:14px;margin:10px 0}.good{color:var(--green)}.bad{color:var(--red)}
+@media(max-width:550px){.grid{grid-template-columns:repeat(8,1fr)}.card{padding:15px}.wrap{margin:12px auto}h1{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="card">
+  <header><div><div class="muted">BÀI KIỂM TRA TRẮC NGHIỆM</div><h1>C# cơ bản</h1><div class="muted">40 câu · 50 phút · Thang điểm 10</div></div><div><div class="muted">Thời gian còn lại</div><div class="timer" id="timer">50:00</div></div></header>
+ </div>
+ <section class="card" id="intro">
+  <h2>Hướng dẫn làm bài</h2>
+  <ul><li>40 câu trắc nghiệm, mỗi câu có 4 lựa chọn.</li><li>Chọn đáp án sẽ hiện đúng/sai và lời giải thích ngay.</li><li>Có thể chuyển câu, quay lại câu đã làm.</li><li>Mỗi câu đúng được 0,25 điểm.</li><li>Bài tự động nộp khi hết 50 phút.</li></ul>
+  <button class="primary" id="start">Bắt đầu làm bài</button>
+ </section>
+ <main id="exam" class="hidden">
+  <div class="card">
+   <div style="display:flex;justify-content:space-between;gap:10px"><b id="count">Câu 1/40</b><span class="muted" id="progressText">Đã làm 0/40</span></div>
+   <div class="bar" style="margin-top:10px"><div id="progress"></div></div>
+  </div>
+  <div class="card"><b>Danh sách câu hỏi</b><p class="muted" style="margin:3px 0 12px;font-size:13px">Màu xanh: đã chọn đáp án</p><div class="grid" id="nav"></div></div>
+  <div class="card">
+   <div class="muted" id="topic" style="font-size:13px;font-weight:bold;margin-bottom:8px"></div>
+   <h2 id="question"></h2><pre class="code hidden" id="code"></pre>
+   <div id="options"></div><div id="feedback"></div>
+   <div class="actions"><button class="secondary" id="prev">← Câu trước</button><button class="primary" id="next">Câu tiếp →</button></div>
+  </div>
+  <div class="card"><button class="secondary" style="width:100%" id="submit">Nộp bài và xem kết quả</button></div>
+ </main>
+ <section class="card hidden" id="result">
+  <div style="text-align:center"><div class="muted">KẾT QUẢ BÀI THI</div><div class="timer" id="score"></div><h2 id="rank"></h2><p class="muted" id="summary"></p></div>
+  <div class="stats"><div class="stat"><strong id="right">0</strong>Đúng</div><div class="stat"><strong id="wrong">0</strong>Sai</div><div class="stat"><strong id="empty">0</strong>Bỏ trống</div></div>
+  <h2 style="margin-top:22px">Xem lại đáp án và lời giải</h2><div id="review"></div>
+  <button class="primary" id="restart">Làm lại đề thi</button>
+ </section>
+ <p class="muted" style="text-align:center;font-size:13px">Website ôn tập C# cơ bản · Hoạt động offline trên trình duyệt</p>
+</div>
+<script>
+const questions = [
+['Môi trường C#','Ngôn ngữ lập trình C# được phát triển bởi công ty nào?',['Apple','Microsoft','Google','IBM'],1,'C# được Microsoft phát triển, gắn liền với nền tảng .NET.'],
+['Môi trường C#','C# thường được sử dụng cùng nền tảng nào?',['.NET','.PSD','Android Studio','Oracle'],0,'.NET cung cấp môi trường và thư viện để phát triển, chạy ứng dụng C#.'],
+['Môi trường C#','IDE là viết tắt của cụm từ nào?',['Internal Data Engine','Integrated Development Environment','Internet Development Extension','Input Data Editor'],1,'IDE là môi trường phát triển tích hợp, ví dụ Visual Studio.'],
+['Môi trường C#','Visual Studio được dùng chủ yếu để làm gì?',['Chỉ soạn thảo văn bản','Phát triển, biên dịch và gỡ lỗi chương trình','Chỉ thiết kế hình ảnh','Quản lý hệ điều hành'],1,'Visual Studio là IDE hỗ trợ viết code, thiết kế giao diện, biên dịch và debug.'],
+['Môi trường C#','CLR có vai trò gì trong .NET?',['Quản lý việc thực thi chương trình .NET','Tạo hình ảnh','Lưu trữ văn bản','Thiết kế giao diện'],0,'CLR (Common Language Runtime) là môi trường thực thi, quản lý bộ nhớ và nhiều hoạt động khi chạy ứng dụng .NET.'],
+['Cấu trúc chương trình','Trong chương trình Console truyền thống, hàm Main() có vai trò gì?',['Kết thúc chương trình','Điểm bắt đầu thực thi chương trình','Nhập dữ liệu','Khai báo thư viện'],1,'Main là điểm bắt đầu thực thi của ứng dụng Console truyền thống.'],
+['Cấu trúc chương trình','Từ khóa using System; có tác dụng gì?',['Khai báo biến','Sử dụng các thành phần thuộc namespace System','Tạo lớp mới','Kết thúc chương trình'],1,'using System giúp sử dụng các thành phần trong System như Console.'],
+['Cấu trúc chương trình','Dấu nào thường dùng để kết thúc một câu lệnh trong C#?',[':', ';', '.', ','],1,'Dấu chấm phẩy ; kết thúc phần lớn câu lệnh C#.'],
+['Cấu trúc chương trình','C# có phân biệt chữ hoa và chữ thường không?',['Không','Có','Chỉ với biến','Chỉ với hàm'],1,'C# phân biệt chữ hoa và chữ thường. Ví dụ name và Name là hai tên khác nhau.'],
+['Kiểu dữ liệu','Kiểu dữ liệu nào dùng để lưu số nguyên?',['string','int','bool','char'],1,'int dùng để lưu số nguyên trong phạm vi cho phép.'],
+['Kiểu dữ liệu','Kiểu dữ liệu nào thích hợp để lưu số thực?',['double','char','bool','string'],0,'double lưu số thực với độ chính xác kép.'],
+['Kiểu dữ liệu','Kiểu dữ liệu string dùng để lưu gì?',['Số nguyên','Ký tự đơn','Chuỗi ký tự','Giá trị đúng sai'],2,'string dùng để lưu văn bản hoặc chuỗi ký tự.'],
+['Kiểu dữ liệu','Kiểu bool có thể nhận những giá trị nào?',['0 và 1','true và false','yes và no','A và B'],1,'bool là kiểu logic chỉ nhận true hoặc false.'],
+['Kiểu dữ liệu','Từ khóa const dùng để khai báo gì?',['Biến có thể thay đổi','Hằng số không thể gán lại sau khi khai báo','Một hàm','Một vòng lặp'],1,'const khai báo hằng số, giá trị phải được xác định khi khai báo.'],
+['Biến và toán tử','Lệnh int tuoi = 18; có ý nghĩa gì?',['Khai báo biến tuổi kiểu int và gán 18','Khai báo chuỗi tuổi','So sánh tuổi với 18','Gọi hàm tuổi'],0,'int là kiểu dữ liệu, tuoi là tên biến, 18 là giá trị được gán.'],
+['Biến và toán tử','Toán tử nào dùng để so sánh hai giá trị bằng nhau?',['=','==','!=','>='],1,'== dùng để so sánh bằng. Còn = dùng để gán giá trị.'],
+['Biến và toán tử','Kết quả của phép tính 10 % 3 là bao nhiêu?',['3','1','0','10'],1,'% lấy phần dư của phép chia. 10 chia 3 dư 1.'],
+['Biến và toán tử','Kết quả của biểu thức 5 + 2 * 3 là gì?',['21','11','15','13'],1,'Nhân thực hiện trước cộng: 5 + 6 = 11.'],
+['Biến và toán tử','Toán tử && có ý nghĩa gì?',['Hoặc','Và','Phủ định','Gán'],1,'&& là AND: cả hai điều kiện phải đúng thì biểu thức mới đúng.'],
+['Biến và toán tử','Toán tử || có ý nghĩa gì?',['Và','Hoặc','Bằng','Khác'],1,'|| là OR: chỉ cần ít nhất một điều kiện đúng.'],
+['Biến và toán tử','Kết quả của biểu thức !(5 > 3) là gì?',['true','false','5','3'],1,'5 > 3 là true. ! đảo ngược true thành false.'],
+['Câu lệnh điều kiện','Câu lệnh nào dùng để kiểm tra điều kiện?',['if','using','namespace','class'],0,'if thực hiện khối lệnh khi điều kiện đúng.'],
+['Câu lệnh điều kiện','Trong cấu trúc if...else, khi điều kiện if sai thì?',['Chương trình luôn dừng','Khối else được thực hiện','Khối if vẫn chạy','Không thể xác định'],1,'Nếu điều kiện if sai, chương trình thực hiện khối else nếu có.'],
+['Câu lệnh điều kiện','Câu lệnh switch thường được dùng trong trường hợp nào?',['Lặp vô hạn','Lựa chọn giữa nhiều trường hợp theo giá trị biểu thức','Khai báo biến','Nhập dữ liệu'],1,'switch giúp lựa chọn nhánh thực hiện dựa trên giá trị biểu thức.'],
+['Vòng lặp','Vòng lặp for thường có những thành phần nào?',['Khởi tạo, điều kiện, cập nhật','Tên lớp, tên hàm','Nhập, xuất, xóa','Chỉ có điều kiện'],0,'for thường gồm phần khởi tạo, điều kiện lặp và biểu thức cập nhật.'],
+['Vòng lặp','Vòng lặp while kiểm tra điều kiện khi nào?',['Sau khi chạy thân vòng lặp','Trước khi chạy thân vòng lặp','Chỉ khi kết thúc chương trình','Không kiểm tra'],1,'while kiểm tra điều kiện trước mỗi lần thực hiện thân vòng lặp.'],
+['Vòng lặp','Vòng lặp do...while có đặc điểm gì?',['Không bao giờ chạy','Thân vòng lặp được thực hiện ít nhất một lần','Chỉ chạy khi điều kiện sai','Luôn chạy đúng hai lần'],1,'do...while kiểm tra điều kiện ở cuối nên thân vòng lặp chạy ít nhất một lần.'],
+['Vòng lặp','Từ khóa break có tác dụng gì trong vòng lặp?',['Bỏ qua một lần lặp','Thoát khỏi vòng lặp gần nhất','Bắt đầu vòng lặp mới','Tạm dừng nhập dữ liệu'],1,'break kết thúc vòng lặp hoặc thoát khỏi switch gần nhất.'],
+['Vòng lặp','Từ khóa continue có tác dụng gì?',['Thoát hoàn toàn khỏi chương trình','Bỏ qua phần còn lại của lần lặp hiện tại và chuyển sang lần tiếp theo','Kết thúc lớp','Xóa biến'],1,'continue chuyển sang vòng lặp tiếp theo, không kết thúc toàn bộ vòng lặp.'],
+['Hàm Console','Console.WriteLine() có tác dụng gì?',['Nhập dữ liệu','Xuất dữ liệu và xuống dòng','Xóa màn hình','Khai báo biến'],1,'WriteLine in nội dung ra màn hình Console và tự xuống dòng.'],
+['Hàm Console','Console.Write() khác Console.WriteLine() ở điểm nào?',['Write không tự xuống dòng','Write không xuất dữ liệu','Write chỉ nhập số','Hai hàm hoàn toàn giống nhau'],0,'Console.Write() không tự động xuống dòng sau khi in.'],
+['Hàm Console','Console.ReadLine() trả về kiểu dữ liệu nào?',['int','double','string','bool'],2,'ReadLine đọc một dòng nhập vào và trả về string.'],
+['Hàm Console','Muốn chuyển chuỗi nhập vào thành số nguyên, có thể dùng cách nào?',['int.Parse()','Console.Write()','string.Read()','Math.Sqrt()'],0,'int.Parse() chuyển chuỗi có nội dung số nguyên thành kiểu int.'],
+['Hàm Console','Kết quả của đoạn code sau là gì?',['53','8','15','Lỗi cú pháp'],0,'Vì a và b là string nên phép + nối chuỗi, kết quả là 53.','string a = "5";\nstring b = "3";\nConsole.WriteLine(a + b);'],
+['Hàm Console','Kết quả của đoạn code sau là gì?',['53','8','2','15'],1,'Hai biến đều là int nên phép + thực hiện cộng số học: 5 + 3 = 8.','int a = 5;\nint b = 3;\nConsole.WriteLine(a + b);'],
+['Hàm Math','Math.Sqrt(25) trả về kết quả nào?',['625','10','5','2'],2,'Math.Sqrt() tính căn bậc hai. Căn bậc hai của 25 là 5.'],
+['Hàm Math','Math.Pow(2, 3) có kết quả là bao nhiêu?',['5','6','8','9'],2,'Math.Pow(a,b) tính a mũ b. 2 mũ 3 bằng 8.'],
+['Windows Forms','Trong Windows Forms, Control nào dùng để nhập văn bản?',['Label','TextBox','PictureBox','Button'],1,'TextBox cho phép người dùng nhập văn bản.'],
+['Windows Forms','Thuộc tính Text của Button có tác dụng gì?',['Đổi kích thước nút','Thiết lập nội dung chữ hiển thị trên nút','Ẩn nút','Đổi tên biến trong code'],1,'Text quy định nội dung hiển thị của điều khiển, ví dụ nút có chữ Đăng nhập.'],
+['Windows Forms','Thuộc tính nào dùng để thiết lập màu nền của một Control?',['ForeColor','BackColor','Font','Location'],1,'BackColor là màu nền; ForeColor là màu chữ.']
+];
+let answers=Array(40).fill(null),index=0,remaining=3000,clock=null,finished=false;
+const $=id=>document.getElementById(id);
+function updateTime(){ $('timer').textContent=String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0');}
+function drawNav(){ $('nav').innerHTML=questions.map((q,i)=>`<button class="num ${answers[i]!==null?'done':''} ${index===i?'active':''}" data-index="${i}">${i+1}</button>`).join('');}
+function draw(){
+ const q=questions[index];$('count').textContent=`Câu ${index+1}/40`;$('topic').textContent=q[0].toUpperCase();$('question').textContent=q[1];
+ $('code').textContent=q[6]||'';$('code').classList.toggle('hidden',!q[6]);
+ $('options').innerHTML=q[2].map((v,i)=>`<button class="option ${answers[index]!==null&&i===q[3]?'correct':''} ${answers[index]===i&&i!==q[3]?'wrong':''}" data-answer="${i}" ${answers[index]!==null?'disabled':''}><span class="letter">${'ABCD'[i]}.</span><span>${v}</span><span style="margin-left:auto">${answers[index]!==null&&i===q[3]?'✓':answers[index]===i?'✕':''}</span></button>`).join('');
+ $('feedback').innerHTML=answers[index]===null?'':`<div class="feedback"><b class="${answers[index]===q[3]?'good':'bad'}">${answers[index]===q[3]?'Chính xác!':'Chưa chính xác!'}</b><div>${q[4]}</div></div>`;
+ $('prev').disabled=index===0;$('next').textContent=index===39?'Xem kết quả →':'Câu tiếp →';
+ const n=answers.filter(x=>x!==null).length;$('progressText').textContent=`Đã làm ${n}/40`;$('progress').style.width=n/40*100+'%';drawNav();
+}
+function choose(a){if(answers[index]!==null||finished)return;answers[index]=a;draw();}
+function finish(){
+ if(finished)return;finished=true;clearInterval(clock);$('exam').classList.add('hidden');$('result').classList.remove('hidden');
+ const right=answers.filter((a,i)=>a===questions[i][3]).length,wrong=answers.filter((a,i)=>a!==null&&a!==questions[i][3]).length,empty=40-right-wrong;
+ $('score').textContent=(right/4).toFixed(2)+'/10';$('right').textContent=right;$('wrong').textContent=wrong;$('empty').textContent=empty;
+ $('rank').textContent=right>=36?'Xuất sắc':right>=32?'Rất tốt':right>=28?'Khá tốt':right>=20?'Cần ôn thêm':'Cần luyện tập thêm';
+ $('summary').textContent=`Bạn trả lời đúng ${right}/40 câu.`;
+ $('review').innerHTML=questions.map((q,i)=>`<div class="review"><b>Câu ${i+1} · ${q[0]}</b><p>${q[1]}</p>${q[6]?`<pre class="code">${q[6]}</pre>`:''}<p class="${answers[i]===q[3]?'good':'bad'}">${answers[i]===null?'Bạn bỏ trống':`Bạn chọn: ${'ABCD'[answers[i]]}`} · Đáp án đúng: ${'ABCD'[q[3]]}</p><div class="muted">${q[4]}</div></div>`).join('');
+}
+$('start').onclick=()=>{$('intro').classList.add('hidden');$('exam').classList.remove('hidden');draw();clock=setInterval(()=>{remaining--;updateTime();if(remaining<=0)finish();},1000);};
+$('options').onclick=e=>{const b=e.target.closest('[data-answer]');if(b)choose(+b.dataset.answer);};
+$('nav').onclick=e=>{const b=e.target.closest('[data-index]');if(b){index=+b.dataset.index;draw();}};
+$('prev').onclick=()=>{if(index>0){index--;draw();}};
+$('next').onclick=()=>{if(index<39){index++;draw();}else finish();};
+$('submit').onclick=()=>{const n=answers.filter(x=>x!==null).length;if(confirm(`Bạn đã chọn đáp án ${n}/40 câu. Bạn chắc chắn muốn nộp bài?`))finish();};
+$('restart').onclick=()=>{answers=Array(40).fill(null);index=0;remaining=3000;finished=false;updateTime();$('result').classList.add('hidden');$('intro').classList.remove('hidden');};
+updateTime();
+</script>
+</body>
+</html>
